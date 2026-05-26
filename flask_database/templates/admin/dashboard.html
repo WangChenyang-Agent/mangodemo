@@ -1,0 +1,160 @@
+{% extends "admin_base.html" %}
+{% block title %}管理后台 - 概览{% endblock %}
+
+{% block content %}
+<h5 class="mb-3">数据概览</h5>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.books') }}" class="text-decoration-none">
+            <div class="card bg-primary text-white shadow-sm h-100 stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-book" style="font-size: 2.2rem;"></i>
+                    <h3 class="mt-2 mb-0">{{ book_count }}</h3>
+                    <small>图书总量 →</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.users') }}" class="text-decoration-none">
+            <div class="card bg-success text-white shadow-sm h-100 stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-people" style="font-size: 2.2rem;"></i>
+                    <h3 class="mt-2 mb-0">{{ user_count }}</h3>
+                    <small>注册用户 →</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.billing') }}" class="text-decoration-none">
+            <div class="card bg-info text-white shadow-sm h-100 stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-cash-stack" style="font-size: 2.2rem;"></i>
+                    <h3 class="mt-2 mb-0">¥ {{ "%.2f"|format(total_sales) }}</h3>
+                    <small>总销售额 →</small>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-pie-chart"></i> 各分类销售额</h6></div>
+            <div class="card-body">
+                <div id="categoryChart" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-trophy"></i> 图书销量 TOP10</h6></div>
+            <div class="card-body">
+                <div id="topBooksChart" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-3 mt-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-robot"></i> AI 销售分析</h6>
+                <button class="btn btn-sm btn-outline-primary" id="aiAnalyzeBtn" onclick="runAIAnalysis()">
+                    <i class="bi bi-magic"></i> 生成分析
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="aiResult" class="text-muted text-center py-3">
+                    <i class="bi bi-lightbulb" style="font-size: 2rem;"></i>
+                    <p class="mt-2 mb-0">点击「生成分析」，让 AI 帮你解读销售数据</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+var chartData = {{ chart|tojson|safe }};
+
+(function(){
+    var catDom = document.getElementById('categoryChart');
+    if (catDom && chartData.categories.length > 0) {
+        var catChart = echarts.init(catDom);
+        catChart.setOption({
+            tooltip: { trigger: 'item', formatter: function(p) { return p.name + ': ¥' + p.value.toFixed(2) + ' (' + p.percent + '%)'; } },
+            legend: { type: 'scroll', orient: 'vertical', right: 10, top: 20 },
+            series: [{
+                type: 'pie',
+                radius: ['45%', '75%'],
+                center: ['40%', '50%'],
+                avoidLabelOverlap: false,
+                itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+                label: { show: false },
+                emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold' } },
+                data: chartData.categories.map(function(c, i) {
+                    return { name: c, value: chartData.values[i] };
+                })
+            }]
+        });
+    } else if (catDom) {
+        catDom.innerHTML = '<p class="text-center text-muted mt-5">暂无销售数据</p>';
+    }
+
+    var topDom = document.getElementById('topBooksChart');
+    if (topDom && chartData.top_books.length > 0) {
+        var topChart = echarts.init(topDom);
+        topChart.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            grid: { left: '5%', right: '12%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'value', name: '销量(本)' },
+            yAxis: { type: 'category', data: chartData.top_books.map(function(b) { return b.name; }).reverse(), axisLabel: { fontSize: 11, width: 80, overflow: 'truncate' } },
+            series: [{
+                type: 'bar',
+                data: chartData.top_books.map(function(b) { return b.count; }).reverse(),
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        { offset: 0, color: '#83bff6' },
+                        { offset: 1, color: '#188df0' }
+                    ])
+                }
+            }]
+        });
+    } else if (topDom) {
+        topDom.innerHTML = '<p class="text-center text-muted mt-5">暂无销量数据</p>';
+    }
+})();
+
+function runAIAnalysis() {
+    var btn = document.getElementById('aiAnalyzeBtn');
+    var result = document.getElementById('aiResult');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 分析中...';
+    result.innerHTML = '<p class="text-muted">AI 正在分析销售数据...</p>';
+
+    fetch('/admin/api/analysis', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) {
+                result.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+            } else {
+                result.innerHTML = '<div style="line-height: 1.9;">' + marked.parse(data.analysis) + '</div>';
+            }
+        })
+        .catch(function(e) {
+            result.innerHTML = '<div class="alert alert-danger">请求失败: ' + e.message + '</div>';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> 生成分析';
+        });
+}
+</script>
+{% endblock %}

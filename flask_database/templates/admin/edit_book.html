@@ -1,0 +1,46 @@
+{% extends "admin_base.html" %}
+{% block title %}编辑图书{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h4 class="mb-4"><i class="bi bi-pencil"></i> 编辑图书</h4>
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">书名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ book.name }}" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">价格</label>
+                            <input type="text" class="form-control" id="price" name="price" value="{{ book.price }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="category" class="form-label">分类</label>
+                            <input type="text" class="form-control" id="category" name="category" value="{{ book.category or '' }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="src" class="form-label">封面图片 URL</label>
+                        <input type="url" class="form-control" id="src" name="src" value="{{ book.src or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">图书简介</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ book.description or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">库存</label>
+                        <input type="number" class="form-control" id="stock" name="stock" value="{{ book.stock or 0 }}" min="0">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> 保存</button>
+                        <a href="{{ url_for('admin.books') }}" class="btn btn-secondary">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
