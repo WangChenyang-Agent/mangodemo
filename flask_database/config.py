@@ -1,5 +1,12 @@
 import os
 
+# 加载 .env 文件
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -19,3 +26,6 @@ class Config:
 
     # Pagination
     BOOKS_PER_PAGE = 20
+
+    # DeepSeek API
+    DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')

@@ -287,7 +287,7 @@ def billing():
 
 # ============= AI Analysis =============
 
-DEEPSEEK_API_KEY = 'sk-c2375e0f8280453eb6fbfa0ffd2aa8ad'
+from flask import current_app
 
 
 @admin.route('/api/analysis', methods=['POST'])
@@ -330,10 +330,14 @@ def ai_analysis():
 {top_lines}"""
 
     try:
+        deepseek_api_key = current_app.config.get('DEEPSEEK_API_KEY', '')
+        if not deepseek_api_key:
+            return {'error': 'DeepSeek API Key 未配置'}
+
         resp = requests.post(
             'https://api.deepseek.com/v1/chat/completions',
             headers={
-                'Authorization': f'Bearer {DEEPSEEK_API_KEY}',
+                'Authorization': f'Bearer {deepseek_api_key}',
                 'Content-Type': 'application/json',
             },
             json={
