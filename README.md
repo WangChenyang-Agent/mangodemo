@@ -15,7 +15,8 @@ mangodemo/
 │   ├── app.py              # 应用入口
 │   ├── config.py           # 配置文件
 │   ├── extensions.py       # 扩展初始化
-│   └── requirements.txt    # Python 依赖
+│   ├── requirements.txt    # Python 依赖
+│   └── .env                # 环境变量（需自行创建）
 └── scrapy_dangdang_38/     # Scrapy 爬虫项目
     ├── scrapy_dangdang_38/
     │   ├── spiders/        # 爬虫文件
@@ -34,6 +35,7 @@ mangodemo/
 | 认证 | Flask-Login | >=0.6 |
 | MySQL驱动 | PyMySQL | >=1.1 |
 | MongoDB驱动 | PyMongo | >=4.6 |
+| 环境变量 | python-dotenv | >=1.0 |
 | 爬虫 | Scrapy | >=2.0 |
 
 ## 功能特性
@@ -97,18 +99,27 @@ pip install -r requirements.txt
 CREATE DATABASE database_learn CHARACTER SET utf8mb4;
 ```
 
-2. 修改 `config.py` 中的数据库连接信息（如需）：
-```python
+2. 创建 `.env` 文件配置环境变量：
+```env
+# Flask 配置
+SECRET_KEY=dev-secret-key-change-in-production
+
 # MySQL 配置
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = '123456'
-MYSQL_HOST = '127.0.0.1'
-MYSQL_DB = 'database_learn'
+MYSQL_USER=root
+MYSQL_PASSWORD=123456
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_DB=database_learn
 
 # MongoDB 配置
-MONGO_URI = 'mongodb://localhost:27017'
-MONGO_DB = 'dangdang'
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=dangdang
+
+# DeepSeek API 配置（用于 AI 分析）
+DEEPSEEK_API_KEY=your-api-key-here
 ```
+
+> **注意**：`.env` 文件包含敏感信息，已添加到 `.gitignore`，请不要提交到版本库。
 
 ### 运行应用
 
