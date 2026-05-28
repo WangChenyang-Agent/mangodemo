@@ -56,7 +56,9 @@ class MongoPipeline:
         self.collection = self.db['books']
 
     def process_item(self, item, spider):
-        self.collection.insert_one(dict(item))
+        doc = dict(item)
+        doc.setdefault('stock', 100)
+        self.collection.insert_one(doc)
         return item
 
     def close_spider(self, spider):

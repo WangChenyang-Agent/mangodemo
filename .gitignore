@@ -1,6 +1,7 @@
 /.idea
 /.env
 /flask_database/.env
+/flask_database/flask_database
 __pycache__/
 *.pyc
 *.pyo

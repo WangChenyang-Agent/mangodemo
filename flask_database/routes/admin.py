@@ -286,15 +286,13 @@ def billing():
 
 
 # ============= AI Analysis =============
-
 from flask import current_app
-
+import os
+from openai import OpenAI
 
 @admin.route('/api/analysis', methods=['POST'])
 @admin_required
 def ai_analysis():
-    import requests
-
     stats = _get_stats()
     chart = _get_chart_data()
 
@@ -330,29 +328,27 @@ def ai_analysis():
 {top_lines}"""
 
     try:
-        deepseek_api_key = current_app.config.get('DEEPSEEK_API_KEY', '')
+        deepseek_api_key = current_app.config.get('DEEPSEEK_API_KEY')
         if not deepseek_api_key:
-            return {'error': 'DeepSeek API Key 未配置'}
+            return {'error': '请先配置 DeepSeek API Key'}
 
-        resp = requests.post(
-            'https://api.deepseek.com/v1/chat/completions',
-            headers={
-                'Authorization': f'Bearer {deepseek_api_key}',
-                'Content-Type': 'application/json',
-            },
-            json={
-                'model': 'deepseek-chat',
-                'messages': [
-                    {'role': 'system', 'content': '你是一个专业的电商数据分析师。回复简洁、专业、有数据支撑。'},
-                    {'role': 'user', 'content': prompt},
-                ],
-                'temperature': 0.7,
-                'max_tokens': 600,
-            },
-            timeout=30,
+        # ✅ 使用你自己提供的【正确】的 OpenAI SDK 方式
+        client = OpenAI(
+            api_key=deepseek_api_key,
+            base_url="https://api.deepseek.com"
         )
-        resp.raise_for_status()
-        analysis = resp.json()['choices'][0]['message']['content']
+
+        response = client.chat.completions.create(
+            model="deepseek-v4-flash",
+            messages=[
+                {"role": "system", "content": "你是一个专业的电商数据分析师。"},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.7,
+        )
+
+        analysis = response.choices[0].message.content
         return {'analysis': analysis}
+
     except Exception as e:
-        return {'error': f'AI 分析请求失败：{str(e)}'}
+        return {'error': f'AI 分析失败：{str(e)}'}

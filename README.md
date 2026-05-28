@@ -96,7 +96,7 @@ pip install -r requirements.txt
 
 1. 创建 MySQL 数据库：
 ```sql
-CREATE DATABASE database_learn CHARACTER SET utf8mb4;
+CREATE DATABASE flask_db CHARACTER SET utf8mb4;
 ```
 
 2. 创建 `.env` 文件配置环境变量：
@@ -109,7 +109,7 @@ MYSQL_USER=root
 MYSQL_PASSWORD=123456
 MYSQL_HOST=127.0.0.1
 MYSQL_PORT=3306
-MYSQL_DB=database_learn
+MYSQL_DB=flask_db
 
 # MongoDB 配置
 MONGO_URI=mongodb://localhost:27017
